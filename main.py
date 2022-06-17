@@ -121,10 +121,6 @@ class AddressBook(UserDict):
             [result.append(f'{k.title()} {v}') for i in value if i in v]
         return result
 
-    def to_shelve(self):
-        with shelve.open('address_book') as db:
-            db['contacts'] = self.data
-
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -145,11 +141,15 @@ def greeting(*args):
 
 
 def to_exit(*args):
-    notebook.to_shelve()
-    return 'Address book saved.\nGoodbye!'
+    return 'Goodbye!'
 
 
-notebook = AddressBook(filename='address_book')
+def to_shelf():
+    with shelve.open('address_book') as db:
+        db['contacts'] = notebook
+
+
+notebook = AddressBook()
 with shelve.open('address_book') as db:
     if 'contacts' in db:
         notebook = AddressBook(db['contacts'])
@@ -244,6 +244,7 @@ def main():
         command, parser_data = command_parser(user_input)
         print(command(*parser_data))
         if command is to_exit:
+            to_shelf()
             break
 
 
